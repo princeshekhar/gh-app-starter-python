@@ -1,15 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" class="height-full">
 
-{% extends 'base.html' %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/primer.css') }}">
+</head>
 
-{% block header %}
-  {% block title %}
-    Welcome!
-  {% endblock %}
-{% endblock %}
+<body class="height-full bg-gray-light">
+    <div class="d-flex flex-column flex-justify-center flex-items-center text-center height-full">
+        App already created and exists!
+    </div>
+</body>
 
-{% block content %}
-<div class="container py-5">
-  {{ readme_html | safe }}
-</div>
-{% endblock %}
-
+</html>

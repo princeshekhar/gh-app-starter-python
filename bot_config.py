@@ -21,7 +21,7 @@ You'll get warnings if any of these are unset
 
 GH_USER = os.getenv("GH_USER", -1)
 GH_USER_TOKEN = os.getenv("GH_USER_TOKEN", -1)
-API_BASE_URL = os.getenv("API_BASE_URL", -1)
+API_BASE_URL = os.getenv("API_BASE_URL", 'https://api.github.com')
 GH_APP_ID = os.getenv("GH_APP_ID", -1)
 GH_APP_CLIENT_ID = os.getenv("GH_APP_CLIENT_ID", -1)
 GH_APP_CLIENT_SECRET = os.getenv("GH_APP_CLIENT_SECRET", -1)

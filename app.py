@@ -1,17 +1,18 @@
 from bot_config import API_BASE_URL, validate_env_variables
-from gh_oauth_token import get_token, store_token
+from gh_oauth_token import get_token, store_token, get_app_info, retrieve_app_info
 from gh_utils import make_github_rest_api_call
 from webhook_handlers import add_pr_comment, check_testing_done
 
 import json
 import logging
+import os
 import requests
 import sys
 import datetime
 import traceback
 import markdown2
 
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, jsonify
 from objectify_json import ObjectifyJSON
 
 log = logging.getLogger(__name__)
@@ -19,41 +20,61 @@ log = logging.getLogger(__name__)
 # Create the Flask App.
 app = Flask(__name__)
 
+pat = "4dc00e484fae8125e0a65298c9211d10efe116c4"
 
-"""
-STATIC PAGES
-==============
-These pages basically just show static HTML
-
-"""
-@app.route('/')
+@app.route('/blah')
 def welcome():
     """Welcome page"""
-    return render_template("index.html", readme_html=markdown2.markdown_path("./README.md"))
+    if os.path.exists('/.env'):
+        return render_template("index.html")
+    else:
+        # Gather required information for the manifest
+        smee_url_response = requests.get('https://smee.io/new')
+
+        # Create a new App Manifest
+        app_manifest = {
+            "description": "A GitHub app",
+            "hook_attributes": {
+                "url": smee_url_response.url
+            },
+            "name": "ppsvallur-test-app-6",
+            "public": True,
+            "redirect_url": "http://localhost:5000/setup",
+            "url": "https://github.com/psvallur/python-bot-5",
+            "version": "v1",
+            "default_events": [
+                "issues"
+            ],
+            "default_permissions": {
+                "issues": "write",
+                "metadata": "read"
+            }
+        }
+
+        # return render_template("setup.html", createAppUrl='https://github.com/settings/apps/new', manifest=json.dumps(app_manifest))
+
+        headers = {'Accept': 'application/vnd.github.fury-preview+json',
+                    'Content-Type': 'application/json',
+                    'Authorization': f'token {pat}'
+        }
+        response = requests.post('https://github.com/settings/apps/new', headers=headers, data=json.dumps({"manifest": json.dumps(app_manifest)}))
+        return jsonify(response.text)
 
 
-"""
-AUTH ROUTES
-============
-
-Dynamic routes that are needed to facilitate the authentication flow
-
-We will let you know when it's appropriate to un-comment this
-"""
-
-@app.route("/authenticate/<app_id>", methods=["GET"])
-def authenticate(app_id):
+@app.route("/setup", methods=["GET"])
+def authenticate():
     """Incoming Installation Request. Accept and get a new token."""
+    log.info(request.headers)
+
     try:
-        app_id = str(app_id)
-        installation_id = request.args.get('installation_id')
-        store_token(get_token(app_id, installation_id))
+        code = request.args.get('code')
+        get_app_info(code)
 
     except Exception:
-        log.error("Unable to get and store token.")
+        log.error("Unable to get app info.")
         traceback.print_exc(file=sys.stderr)
 
-    return redirect("https://www.github.com", code=302)
+    return redirect(retrieve_app_info('app_url') or 'https://github.com')
 
 
 @app.route('/webhook', methods=['POST'])

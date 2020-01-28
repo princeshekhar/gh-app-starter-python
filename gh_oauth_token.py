@@ -28,6 +28,37 @@ _token_storage_path = f'private/.secret'
 _private_key_path = f'private/gh-app.key'
 
 
+def get_app_info(code):
+    headers = {'Accept': 'application/vnd.github.fury-preview+json'}
+    app_manifest_url = f"{API_BASE_URL}/app-manifests/{code}/conversions"
+
+    response = requests.post(app_manifest_url, headers=headers)
+
+    response_json = json.loads(response.text)
+
+    app_id = response_json.get('id')
+    client_id = response_json.get('client_id')
+    client_secret = response_json.get('client_secret')
+    webhook_secret = response_json.get('webhook_secret')
+    pem = response_json.get('pem')
+    app_url = f'https://github.com/settings/apps{response_json.get("name")}'
+
+    with open(_private_key_path, 'w') as private_key:
+        private_key.write(json.dumps({
+            'app_id': app_id,
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'webhook_secret': webhook_secret,
+            'pem': pem,
+            'app_url': app_url
+        }))
+
+
+def retrieve_app_info(key):
+    with open(_private_key_path, 'r') as private_key_file:
+        return json.loads(private_key_file.read()).get(key)
+
+
 def get_token(app_id, installation_id):
     """Get a token from GitHub."""
     token_url = f"{API_BASE_URL}/app/installations/{installation_id}/access_tokens"
