@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 # Create the Flask App.
 app = Flask(__name__)
 
-pat = "4dc00e484fae8125e0a65298c9211d10efe116c4"
+pat = ""
 
 @app.route('/blah')
 def welcome():
