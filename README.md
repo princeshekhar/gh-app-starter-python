@@ -1,4 +1,4 @@
-# Python GitHub App. Yay!
+# Python GitHub App
 
 This app is meant to serve as an application to help you onboard to the GitHub ecosystem and start using GitHub Webhooks & Apps.
 
